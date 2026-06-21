@@ -35,9 +35,13 @@ class Settings(BaseSettings):
     cache_dir: Path = ROOT_DIR / ".cache"
     cache_ttl_seconds: int = 60 * 60 * 12  # 12 hours
 
-    # --- CORS (the React dev server) ---
-    # Regex so any localhost port works (Vite may shift 5173 -> 5174 etc.).
-    cors_origin_regex: str = r"http://(localhost|127\.0\.0\.1):\d+"
+    # --- CORS ---
+    # Allows the local React dev server (any port, since Vite may shift
+    # 5173 -> 5174 etc.) and any Vercel-hosted frontend (*.vercel.app).
+    # Override via the CORS_ORIGIN_REGEX env var to pin a specific UI domain.
+    cors_origin_regex: str = (
+        r"https://([a-z0-9-]+\.)*vercel\.app|http://(localhost|127\.0\.0\.1):\d+"
+    )
 
 
 settings = Settings()  # type: ignore[call-arg]
