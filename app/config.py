@@ -1,6 +1,7 @@
 """Application configuration, loaded from environment / .env."""
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -32,7 +33,10 @@ class Settings(BaseSettings):
 
     # --- Cache ---
     # FRED macro/FX data updates at most daily, so caching for hours is safe.
-    cache_dir: Path = ROOT_DIR / ".cache"
+    # Must be a writable dir: on serverless hosts (Vercel) the project tree is
+    # read-only and only the OS temp dir (/tmp) can be written. Override via
+    # the CACHE_DIR env var if you want a persistent location.
+    cache_dir: Path = Path(tempfile.gettempdir()) / "macrosignal-cache"
     cache_ttl_seconds: int = 60 * 60 * 12  # 12 hours
 
     # --- CORS ---
