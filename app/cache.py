@@ -34,7 +34,13 @@ def get(key: str) -> Any | None:
 
 
 def set(key: str, data: Any) -> None:
-    settings.cache_dir.mkdir(parents=True, exist_ok=True)
-    path = _key_to_path(key)
-    payload = {"_cached_at": time.time(), "data": data}
-    path.write_text(json.dumps(payload), encoding="utf-8")
+    # Caching is best-effort: a read-only or full filesystem (e.g. a serverless
+    # host) must degrade to "no cache", never crash the request that produced
+    # the data.
+    try:
+        settings.cache_dir.mkdir(parents=True, exist_ok=True)
+        path = _key_to_path(key)
+        payload = {"_cached_at": time.time(), "data": data}
+        path.write_text(json.dumps(payload), encoding="utf-8")
+    except OSError:
+        return
